@@ -14,6 +14,10 @@ app.get("/api/hello", (req: Request, res: Response) => {
     res.json({ message: "Hello, world! This is a new API endpoint." });
 });
 
+app.get("/api/world", (req: Request, res: Response) => {
+    res.json({ message: "Hello, world! This is a new API endpoint." });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
