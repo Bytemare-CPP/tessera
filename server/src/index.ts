@@ -18,6 +18,11 @@ app.get("/api/world", (req: Request, res: Response) => {
     res.json({ message: "Hello, world! This is a new API endpoint." });
 });
 
+app.get("/api/edgar", (req: Request, res: Response) => {
+    res.json({message: "Hello , my name is edgar and im apart of this projects"});
+
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
