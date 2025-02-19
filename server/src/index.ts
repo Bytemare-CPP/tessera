@@ -23,6 +23,11 @@ app.get("/api/edgar", (req: Request, res: Response) => {
 
 });
 
+app.get("/api/jonathan", (req: Request, res: Response) => {
+    res.json({ message: "Hi, my name is Jonathan and I am a contributor to this project." });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
