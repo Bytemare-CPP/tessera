@@ -1,15 +1,40 @@
 import { useEffect, useState, ReactNode } from "react";
 import { auth } from "../firebaseConfig";
-import { GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  User,
+  setPersistence,
+  browserSessionPersistence,
+  onAuthStateChanged, // Ensure this is imported
+} from "firebase/auth";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    return () => unsubscribe();
-  }, []);
+    const configureAuthPersistence = async () => {
+      try {
+        await setPersistence(auth, browserSessionPersistence);
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error("Auth Persistence Error:", error);
+      }
+    };
+
+    const unsubscribePromise = configureAuthPersistence();
+
+    return () => {
+      unsubscribePromise.then((unsubscribe) => {
+        if (unsubscribe) unsubscribe();
+      });
+    };
+  }, []); // ✅ Empty dependency array, since `auth` is imported at the top
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
