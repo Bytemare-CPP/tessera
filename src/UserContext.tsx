@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
+import { signInWithGoogle, signOutFromGoogle } from './firebaseConfig';
 
 interface User {
   id: string;
@@ -8,7 +9,7 @@ interface User {
 
 interface UserContextType {
   user: User | null;
-  login: (userData: User) => void;
+  login: () => void;
   logout: () => void;
 }
 
@@ -18,21 +19,35 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check if user data is stored in localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const login = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const userData = {
+        id: result.user.uid,
+        name: result.user.displayName || '',
+        email: result.user.email || ''
+      };
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error logging in with Google:', error);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      await signOutFromGoogle();
+      setUser(null);
+      localStorage.removeItem('user');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
