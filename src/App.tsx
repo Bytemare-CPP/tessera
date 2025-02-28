@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
 import About from './pages/About';
+import TesseraDemo from './pages/TesseraDemo';
 import { UserContext } from './UserContext';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/teserra" element={<TesseraDemo />} />
         </Routes>
       </div>
       <div>
