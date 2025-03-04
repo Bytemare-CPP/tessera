@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import NavBar from "./components/Navbar";
+import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import { UserContext } from "./UserContext";
@@ -16,7 +16,7 @@ function App() {
     <Router>
       <div>
         <NavBar />
-        <div>
+        <div className="pt-20"> {/* Add padding to account for the fixed NavBar height */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />

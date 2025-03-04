@@ -6,10 +6,10 @@ import home from "../assets/Home Button.svg";
 import dm from "../assets/Direct Messages Button.svg";
 import { Link } from "react-router-dom";
 
-const Navbar = () => {
+const NavBar = () => {
   return (
-    <div className="m-0 p-0 h-20">
-      <nav className="flex w-full justify-between bg-[#3e2723] px-4 py-2">
+    <div className="fixed top-0 left-0 w-full bg-[#3e2723] z-50">
+      <nav className="flex w-full justify-between px-4 py-2">
         <div className="flex space-x-4 items-center">
           <Link to="/">
             <img src={logoimage} alt="Tessera" className="h-10" />
@@ -46,4 +46,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavBar;
