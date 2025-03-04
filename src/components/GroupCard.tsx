@@ -1,4 +1,10 @@
-function GroupCard() {
+interface GroupCardProps {
+  name: string;
+  description: string;
+  profilePicture: string;
+}
+
+function GroupCard({ name, description, profilePicture }: GroupCardProps) {
   return (
     <div
       id="groupCardDiv"
@@ -12,7 +18,7 @@ function GroupCard() {
         {/* Group Card Image */}
         <img
           id="groupCardImage"
-          src="/JohnPork.png"
+          src={profilePicture}
           className="w-[128px] h-[128px] rounded-[25%]"
           alt="ProfilePicture"
         />
@@ -29,26 +35,16 @@ function GroupCard() {
         <p
           id="groupCardName"
           className="text-[#424242] font-bold text-2xl overflow-hidden"
-          style={{
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 1,
-          }}
         >
-          Group name
+          {name}
         </p>
 
         {/* Group Card Text */}
         <p
           id="groupCardText"
           className="text-[#424242] text-lg overflow-hidden"
-          style={{
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 4,
-          }}
         >
-          This tells the user what is going on. What should the character limit be?
+          {description}
         </p>
       </div>
       {/* End Group Name and Text Div */}

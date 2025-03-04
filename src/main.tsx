@@ -10,7 +10,6 @@ import { UserProvider } from './UserContext';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <UserProvider>
-    
       <App />
     </UserProvider>
   </StrictMode>

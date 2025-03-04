@@ -1,4 +1,9 @@
-function PeerCard() {
+interface PeerCardProps {
+  name: string;
+  profilePicture: string;
+}
+
+function PeerCard({ name, profilePicture }: PeerCardProps) {
   return (
     <div
       id="peerCardDiv"
@@ -12,7 +17,7 @@ function PeerCard() {
         {/* Peer Card Image */}
         <img
           id="peerCardImage"
-          src="/JohnPork.png"
+          src={profilePicture}
           className="w-[128px] h-[128px] rounded-full"
           alt="ProfilePicture"
         />
@@ -27,7 +32,7 @@ function PeerCard() {
             WebkitLineClamp: 2,
           }}
         >
-          Joseph Schmo
+          {name}
         </p>
       </div>
       {/* End Image Div */}
