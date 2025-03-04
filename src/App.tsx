@@ -1,9 +1,7 @@
 import { useContext } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes,  } from 'react-router-dom';
+import NavBar from './components/Navbar';
 
-import Home from './pages/Home';
-import About from './pages/About';
-import Nav from './pages/Nav';
 import { UserContext } from './UserContext';
 
 function App() {
@@ -14,29 +12,12 @@ function App() {
   const { user, login, logout } = userContext;
 
   return (
+  <div>
     <Router>
       <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/about">About</Link>
-            </li>
-            <li>
-              <Link to="/Nav">Nav</Link>
-            </li>
-          </ul>
-        </nav>
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path = "/Nav" element = {<Nav/>}/>
-        </Routes>
+      <NavBar />  
       </div>
-      <div>
+      {/* <div>
         {user ? (
           <div>
             <p>Welcome, {user.name}</p>
@@ -47,8 +28,11 @@ function App() {
             Login with Google
           </button>
         )}
-      </div>
+      </div> */}
     </Router>
+
+    
+    </div>
   );
 }
 
