@@ -1,64 +1,38 @@
 function PeerCard() {
-    return (
+  return (
+    <div
+      id="peerCardDiv"
+      className="bg-[#FDF7F4] h-[250px] w-[200px] flex items-center justify-center rounded-lg shadow-md"
+    >
+      {/* Image Div */}
+      <div
+        id="peerCardImageDiv"
+        className="w-[128px] h-[128px] rounded-full transform -translate-y-10"
+      >
+        {/* Peer Card Image */}
+        <img
+          id="peerCardImage"
+          src="/JohnPork.png"
+          className="w-[128px] h-[128px] rounded-full"
+          alt="ProfilePicture"
+        />
 
-        <div // Peer Card Div
-            id="peerCardDiv"
-            style={{
-                backgroundColor: "#FDF7F4",
-                height: "250px",
-                width: "200px",
-                display: "flex",
-                alignItems: "center",      // centers vertically
-                justifyContent: "center",   // centers horizontally
-                borderRadius: "12px",      // rounds the corners
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)"  // adds a gray shadow
-            }}
+        {/* Peer Card Name */}
+        <p
+          id="peerCardName"
+          className="text-[#424242] font-bold text-2xl mt-2 overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+          }}
         >
-
-            {/* Image Div */}
-            <div
-                id="peerCardImageDiv"
-                style={{
-                    width: "128px",
-                    height: "128px",
-                    borderRadius: "50%",
-                    transform: "translateY(-40px)"  // shifts the circle 40px upward
-                }}
-            >
-                {/* Peer Card Image*/}
-                <img
-                    id="peerCardImage"
-                    src="/JohnPork.png"
-                    style={{
-                        width: "128px",
-                        height: "128px",
-                        borderRadius: "50%"
-                    }}
-                    alt="ProfilePicture"
-                />
-
-                {/* Peer Card Name */}
-                <p
-                    id="peerCardName"
-                    style={{
-                        color: '#424242',
-                        fontFamily: 'Arial',
-                        fontWeight: 'bold',
-                        fontSize: '24px',
-                        marginTop: '8px',
-                        display: "-webkit-box",          
-                        WebkitBoxOrient: "vertical",      
-                        WebkitLineClamp: 2,               
-                        overflow: "hidden" 
-                    }}
-                >
-                    Joseph Schmo 
-                </p>
-            </div>
-            {/* End Image Div */}
-
-        </div> // End Peer Card Div
-    );
+          Joseph Schmo
+        </p>
+      </div>
+      {/* End Image Div */}
+    </div>
+  );
 }
 
 export default PeerCard;

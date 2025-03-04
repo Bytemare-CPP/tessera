@@ -1,89 +1,60 @@
 function GroupCard() {
-    return (
-        <div // Group Card Div
-            id="groupCardDiv"
-            style={{
-                backgroundColor: "#FDF7F4",
-                height: "250px",
-                width: "420px",
-                display: "flex",
-                alignItems: "center",      
-                justifyContent: "space-evenly",   
-                borderRadius: "12px",      
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)"  
-            }}
+  return (
+    <div
+      id="groupCardDiv"
+      className="bg-[#FDF7F4] h-[250px] w-[404px] flex items-center justify-evenly rounded-lg shadow-md"
+    >
+      {/* Image Div */}
+      <div
+        id="groupCardImageDiv"
+        className="w-[128px] h-[128px] rounded-[25%]"
+      >
+        {/* Group Card Image */}
+        <img
+          id="groupCardImage"
+          src="/JohnPork.png"
+          className="w-[128px] h-[128px] rounded-[25%]"
+          alt="ProfilePicture"
+        />
+        {/* End Group Card Image */}
+      </div>
+      {/* End Image Div */}
+
+      {/* Group Name and Text */}
+      <div
+        id="groupNameAndTextDiv"
+        className="w-[169px] h-[204px] flex flex-col justify-center"
+      >
+        {/* Group Card Name */}
+        <p
+          id="groupCardName"
+          className="text-[#424242] font-bold text-2xl overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 1,
+          }}
         >
+          Group name
+        </p>
 
-            {/* Image Div */}
-            <div
-                id="groupCardImageDiv"
-                style={{
-                    width: "128px",
-                    height: "128px",
-                    borderRadius: "25%",
-                }}
-            >
-                {/* Group Card Image*/}
-                <img
-                    id="groupCardImage"
-                    src="/JohnPork.png"
-                    style={{
-                        width: "128px",
-                        height: "128px",
-                        borderRadius: "25%"
-                    }}
-                    alt="ProfilePicture"
-                />
-                {/* End Group Card Image*/}
-            
-            </div> {/* End Image Div */}
-
-            {/* Group Name and Text */}
-            <div
-                id="groupNameAndTextDiv"
-                style={{
-                    width: "169px",
-                    height: "204px"
-                }}
-            >
-                    {/* Group Card Name */}
-                    <p
-                        id="groupCardName"
-                        style={{
-                            color: '#424242',
-                            fontFamily: 'Arial',
-                            fontWeight: 'bold',
-                            fontSize: '24px',
-                            display: "-webkit-box",          
-                            WebkitBoxOrient: "vertical",      
-                            WebkitLineClamp: 1,               
-                            overflow: "hidden"   
-                        }}
-                    >
-                        Group name 
-                    </p>
-                    
-                    {/* Group Card Text */}
-                    <p
-                        id="groupCardText"
-                        style={{
-                            color: '#424242',
-                            fontFamily: 'Arial',
-                            fontSize: '18px',
-                            display: "-webkit-box",          
-                            WebkitBoxOrient: "vertical",      
-                            WebkitLineClamp: 4,               // Limit of allowed lines
-                            overflow: "hidden"                
-                        }}
-                    >
-                        This tells the user what is going on. What should the character limit be?
-                    </p>
-
-                </div>
-                {/* End Group Name and Text Div */}
-
-        </div> // End Group Card Div
-    );
+        {/* Group Card Text */}
+        <p
+          id="groupCardText"
+          className="text-[#424242] text-lg overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 4,
+          }}
+        >
+          This tells the user what is going on. What should the character limit be?
+        </p>
+      </div>
+      {/* End Group Name and Text Div */}
+    </div>
+    // End Group Card Div
+  );
 }
 
 export default GroupCard;
