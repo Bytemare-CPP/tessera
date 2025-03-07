@@ -9,7 +9,7 @@ function App() {
   if (!userContext) {
     return <div>Error: UserContext is not provided</div>;
   }
-  const { user, login, logout } = userContext;
+  // const { user, login, logout } = userContext;
 
   return (
   <div>
