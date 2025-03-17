@@ -4,14 +4,16 @@ import './styles/index.css';
 import './styles/App.css';
 import './styles/styles.css';
 import App from './App';
-import { UserProvider } from './UserContext';
+
+import Register from '../src/pages/Register';
+import { BrowserRouter } from 'react-router-dom';
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <UserProvider>
-    
+   {/* <Register/> */}
+   
       <App />
-    </UserProvider>
+   
   </StrictMode>
 );

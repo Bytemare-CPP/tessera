@@ -1,60 +1,60 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
-import { signInWithGoogle, signOutFromGoogle } from './firebaseConfig';
+// import { createContext, useState, useEffect, ReactNode } from 'react';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
 
-interface UserContextType {
-  user: User | null;
-  login: () => void;
-  logout: () => void;
-}
+// interface User {
+//   id: string;
+//   name: string;
+//   email: string;
+// }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+// interface UserContextType {
+//   user: User | null;
+//   login: () => void;
+//   logout: () => void;
+// }
 
-const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+// const UserContext = createContext<UserContextType | undefined>(undefined);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+// const UserProvider = ({ children }: { children: ReactNode }) => {
+//   const [user, setUser] = useState<User | null>(null);
 
-  const login = async () => {
-    try {
-      const result = await signInWithGoogle();
-      const userData = {
-        id: result.user.uid,
-        name: result.user.displayName || '',
-        email: result.user.email || ''
-      };
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch (error) {
-      console.error('Error logging in with Google:', error);
-    }
-  };
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem('user');
+//     if (storedUser) {
+//       setUser(JSON.parse(storedUser));
+//     }
+//   }, []);
 
-  const logout = async () => {
-    try {
-      await signOutFromGoogle();
-      setUser(null);
-      localStorage.removeItem('user');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
+//   const login = async () => {
+//     try {
+//       const result = await signInWithGoogle();
+//       const userData = {
+//         id: result.user.uid,
+//         name: result.user.displayName || '',
+//         email: result.user.email || ''
+//       };
+//       setUser(userData);
+//       localStorage.setItem('user', JSON.stringify(userData));
+//     } catch (error) {
+//       console.error('Error logging in with Google:', error);
+//     }
+//   };
 
-  return (
-    <UserContext.Provider value={{ user, login, logout }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
+//   const logout = async () => {
+//     try {
+//       await signOutFromGoogle();
+//       setUser(null);
+//       localStorage.removeItem('user');
+//     } catch (error) {
+//       console.error('Error logging out:', error);
+//     }
+//   };
 
-export { UserContext, UserProvider };
+//   return (
+//     <UserContext.Provider value={{ user, login, logout }}>
+//       {children}
+//     </UserContext.Provider>
+//   );
+// };
+
+// export { UserContext, UserProvider };
