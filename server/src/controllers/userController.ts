@@ -1,54 +1,72 @@
-/*
-    Logic to retreive and update user data in Firestore
-*/
+import { Request, Response, RequestHandler } from 'express';
+import { supabase } from '../services/supabase'; // Import Supabase client
 
-import { RequestHandler } from 'express';
-import { db } from '../services/firebase';
-import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 
-export const getUserProfile: RequestHandler =  async (req, res) => {
-    console.log('GET user profile for ID:', req.params.id);
+/**
+ * Get the user profile by user ID.
+ */
+export const getUserProfile: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.params.id;
-        // Get user data from Firestore
-        const userRef = doc(db, 'users', userId);
-        const snap = await getDoc(userRef);
+        const userId = req.query.user_id as string; // Get the user ID from query parameters
 
-        if (!snap.exists()) {
-            res.status(404).json({ error: 'User not found' });
+        if (!userId) {
+            res.status(400).json({ error: 'Bad Request: user_id is required' });
+            return;
         }
-        
-        // Return user data
-        res.status(200).json(snap.data());
+
+        // Query the 'profiles' table for the user's profile
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url, is_active') // Select only necessary fields
+            .eq('id', userId)
+            .single();
+
+        if (error || !profile) {
+            res.status(404).json({ error: error?.message || 'Profile not found' });
+            return;
+        }
+
+        res.status(200).json(profile); // Return the profile
     } catch (error) {
         res.status(500).json({ error: (error as Error).message });
     }
 };
 
-export const updateUserProfile: RequestHandler = async (req, res) => {   
+/**
+ * Update the user profile by user ID.
+ */
+export const updateUserProfile: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.params.id;
-        const updateData = req.body;    // e.g. { name, avatarUrl, etc. }
+        const userId = req.body.user_id; // Get the user ID from the request body
 
-        // Update user data in firestore
-        const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, updateData);
+        if (!userId) {
+            res.status(400).json({ error: 'Bad Request: user_id is required' });
+            return;
+        }
 
-        res.status(200).json({ message: 'User data updated successfully' });
-    } catch (error) {
-        res.status(500).json({ error: (error as Error).message });
-    }
-};
+        const updateData = req.body; // Get the update data from the request body
 
-export const deleteUserProfile: RequestHandler = async (req, res) => {
-    try {
-        const userId = req.params.id;
+        // Validate the update data (optional, but recommended)
+        if (!updateData || typeof updateData !== 'object') {
+            res.status(400).json({ error: 'Invalid update data' });
+            return;
+        }
 
-        // Delete user data from Firestore
-        const userRef = doc(db, 'users', userId);
-        await deleteDoc(userRef);
+        // Remove user_id from the update data to avoid overwriting it
+        delete updateData.user_id;
 
-        res.status(200).json({ message: 'User data deleted successfully' });
+        // Update the user's profile in the 'profiles' table
+        const { error } = await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', userId);
+
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+
+        res.status(200).json({ message: 'User profile updated successfully' });
     } catch (error) {
         res.status(500).json({ error: (error as Error).message });
     }
