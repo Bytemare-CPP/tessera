@@ -35,7 +35,7 @@ const Landing: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#FAE8E0] to-[#FDF7F4] flex items-center justify-center">
       <div className="container max-w-3xl mx-auto px-6 text-center">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#424242] leading-tight mb-6">
-          TEST Real updates from real people.
+          Real updates from real people.
         </h1>
         <p className="text-xl text-[#666666] mb-8 mx-auto">
           Chronological, intentional, and real. Tessera helps you stay in touch with people you actually care about.
