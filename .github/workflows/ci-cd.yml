@@ -17,9 +17,9 @@ jobs:
           node-version: '22.14.0'
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: cd console && npm ci
       - name: Run tests
-        run: npm test
+        run: cd console && npm test
 
   build:
     needs: test
@@ -32,14 +32,14 @@ jobs:
           node-version: '22.14.0'
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: cd console && npm ci
       - name: Build application
-        run: npm run build
+        run: cd console && npm run build
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: dist/
+          path: console/dist/
 
   deploy:
     needs: build
@@ -51,7 +51,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: dist/
+          path: console/dist/
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -62,7 +62,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy to EC2
         run: |
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p ~/tessera/"
-          rsync -avz --delete dist/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera/dist/
-          rsync -avz package.json package-lock.json ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera/
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'cd ~/tessera/ && npm ci --production && pm2 restart tessera || pm2 start npm --name "tessera" -- start'
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p ~/tessera/console/"
+          rsync -avz --delete console/dist/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera/console/dist/
+          rsync -avz console/package.json console/package-lock.json ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera/console/
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'cd ~/tessera/console/ && npm ci --production && pm2 restart tessera || pm2 start npm --name "tessera" -- start'
