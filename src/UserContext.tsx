@@ -1,11 +1,11 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
 
-// Define the User interface
+// Define the User interface to match DB schema
 interface User {
-  id: string;
-  name: string;
-  email: string;
-  photoURL: string;
+  user_id: string;
+  full_name: string;
+  avatar_url: string;
+  is_active: boolean;
 }
 
 // Define what's available in the context
@@ -37,10 +37,10 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   const login = (userData?: User) => {
     // If userData is provided, use it; otherwise use default mock data
     const mockUser: User = userData || {
-      id: 'mock-user-123',
-      name: 'Demo User',
-      email: 'demo@example.com',
-      photoURL: 'https://via.placeholder.com/150'
+      user_id: 'mock-user-123',
+      full_name: 'Demo User',
+      avatar_url: 'https://via.placeholder.com/150',
+      is_active: true
     };
     
     console.log('Logging in with user:', mockUser);
