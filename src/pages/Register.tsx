@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Link } from "react-router-dom";
+import bird from "../assets/bird.jpeg"
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [full_name,setName] = useState("");
-  const [avatar_url,setAvatarUrl] = useState("");
+
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -19,7 +20,7 @@ function Register() {
       options:{
         data:{
           full_name :full_name,
-          avatar_url: avatar_url
+          
         },
       },
     
@@ -37,15 +38,22 @@ function Register() {
     setEmail("");
     setPassword("");
     setName("");
-    setAvatarUrl("");
+    
   };
 
   return (
-    <div className = "bg-gray-200 ">
-      <h2>Register</h2>
+    <div className="login-box border border-black flex flex-row ">
+    
+    <div className = 'border border-black w-1/2'>
+        <img className='h-1/2' src = {bird} alt = "placeholder"/>
+    </div>
+
+    <div className = "bg-gray-200 w-150 h-250 content-center ">
+     
       <br></br>
       {message && <span>{message}</span>}
-      <form onSubmit={handleSubmit}>
+      <form className="flex flex-col w-100 pl-20" onSubmit={handleSubmit}>
+      <h2 className="text-black border border-black">Register</h2>
         <input 
           className="border border-black text-black"
           onChange={(e) => setEmail(e.target.value)}
@@ -54,6 +62,7 @@ function Register() {
           placeholder="Email"
           required
         />
+        <label>Email</label>
         <input
           className="border border-black text-black"
           onChange={(e) => setPassword(e.target.value)}
@@ -62,6 +71,7 @@ function Register() {
           placeholder="Password"
           required
         />
+        <label>Password</label>
         <input 
             className="border border-black text-black"
             onChange={(e) => setName(e.target.value)}
@@ -70,20 +80,15 @@ function Register() {
             placeholder="Name"
             required
         />
-
-        <input 
-            className="border border-black text-black"
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            value = {avatar_url}
-            type = "text"
-            placeholder="Avatar URL"
-            required
-        />
+        <label>Name</label>
+        
         
         <button type="submit">Create Account</button>
       </form>
-      <span>Already have an account?</span>
-      <Link to="/login">Log in.</Link>
+      <span className="text-black text-xl">Already have an account?</span>
+      <Link to="/">Log in.</Link>
+    </div>
+    
     </div>
   );
 }
