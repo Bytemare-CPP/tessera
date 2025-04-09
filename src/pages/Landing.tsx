@@ -10,28 +10,26 @@ const Landing: React.FC = () => {
     return <div>Error: UserContext is not provided</div>;
   }
 
-  // Bob Brown's user info from the API
-  const bobBrownUser = {
-    user_id: '34f622cb-81e7-4e80-b769-3a655d1df57e',
-    full_name: 'Bob Brown',
-    avatar_url: 'https://placekitten.com/201/201',
-    is_active: true
+  const handleLogin = async () => {
+    try {
+      // Trigger Google OAuth login
+      await userContext.login();
+      // Navigate to the home page after successful login
+      navigate('/');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
   
-  const handleLogin = () => {
-    // Login with Bob Brown (our test user)
-    userContext.login(bobBrownUser);
-    
-    // Navigate to home page
-    navigate('/');
-  };
-  
-  const handleRegister = () => {
-    // Use the same test user for register too
-    userContext.login(bobBrownUser);
-    
-    // Navigate to home page
-    navigate('/');
+  const handleRegister = async () => {
+    try {
+      // Trigger Google OAuth login (same as login for this case)
+      await userContext.login();
+      // Navigate to the home page after successful registration
+      navigate('/');
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
   };
   
   return (
@@ -48,13 +46,13 @@ const Landing: React.FC = () => {
             className="bg-[#E7A691] hover:bg-[#D8957F] text-[#424242] text-lg font-medium py-3 px-8 rounded-lg shadow-md transition-all duration-300"
             onClick={handleLogin}
           >
-            Log In (Test User: Bob Brown)
+            Log In with Google
           </button>
           <button 
             className="bg-transparent hover:bg-[#FAE8E0] text-[#424242] border-2 border-[#E7A691] text-lg font-medium py-3 px-8 rounded-lg shadow-md transition-all duration-300"
             onClick={handleRegister}
           >
-            Register
+            Register with Google
           </button>
         </div>
       </div>

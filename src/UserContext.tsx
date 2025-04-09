@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from './supabaseClient'; // Ensure this points to your Supabase client setup
 
 // Define the User interface to match DB schema
 interface User {
@@ -11,8 +12,8 @@ interface User {
 // Define what's available in the context
 interface UserContextType {
   user: User | null;
-  login: (userData?: User) => void;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -24,46 +25,49 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Check localStorage on initial load
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Listen for auth state changes
+    const { data: subscription } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { id, user_metadata } = session.user;
+        setUser({
+          user_id: id,
+          full_name: user_metadata.full_name || 'Anonymous',
+          avatar_url: user_metadata.avatar_url || '',
+          is_active: true,
+        });
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.subscription?.unsubscribe();
+    };
   }, []);
 
-  // Placeholder login function
-  const login = (userData?: User) => {
-    // If userData is provided, use it; otherwise use default mock data
-    const mockUser: User = userData || {
-      user_id: 'mock-user-123',
-      full_name: 'Demo User',
-      avatar_url: 'https://via.placeholder.com/150',
-      is_active: true
-    };
-    
-    console.log('Logging in with user:', mockUser);
-    
-    // Update state
-    setUser(mockUser);
-    
-    // Store in localStorage
-    localStorage.setItem('user', JSON.stringify(mockUser));
+  const login = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
   };
 
-  // Placeholder logout function
-  const logout = () => {
-    console.log('Logging out user');
-    
-    // Clear state
-    setUser(null);
-    
-    // Clear localStorage
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
-  // Provide the context value
   return (
     <UserContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
