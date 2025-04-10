@@ -1,6 +1,6 @@
 import type React from "react"
 import { useState, useRef } from "react"
-import johnPork from "/public/JohnPork.png"
+import johnPork from "/JohnPork.png"
 import imageIcon from "../assets/imageIcon.svg"
 
 interface PostFromProps {

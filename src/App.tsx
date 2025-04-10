@@ -7,11 +7,14 @@ import Profile from "./pages/Profile";
 import DirectMessages from "./pages/DirectMessages";
 import Landing from "./pages/Landing";
 import { UserContext } from "./UserContext";
+import ProfileWrapper from "./pages/ProfileWrapper";
+import ErrorPage from "./pages/ErrorPage";
 
 function App() {
   const userContext = useContext(UserContext);
-  if (!userContext) {
-    return <div>Error: UserContext is not provided</div>;
+
+  if (!userContext || userContext.isLoading) {
+    return <div>Loading user info...</div>;
   }
   
   // Check if user is logged in
@@ -37,7 +40,16 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            
+            {/* Default route for the logged in user*/}
             <Route path="/profile" element={<Profile />} />
+
+            {/* Dynamic profile route for other users */}
+            <Route path="/:username" element={<ProfileWrapper />} />
+
+            {/* Error page route */}
+            <Route path="/error" element={<ErrorPage />} />
+
             <Route path="/direct-messages" element={<DirectMessages />} />
             {/* Redirect to home if user tries to access landing page while logged in */}
             <Route path="/landing" element={<Navigate to="/" replace />} />
