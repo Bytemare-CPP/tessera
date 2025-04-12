@@ -9,6 +9,7 @@ dotenv.config(); // Load environment variables
 import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import helmet from 'helmet';
 import { authenticate } from './middleware/authMiddleware';
 import { apiLimiter } from './middleware/rateLimiter';
 
@@ -23,6 +24,7 @@ const app: Application = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware Setup
+app.use(helmet()); // Add this before other middleware
 app.use(cors({
     origin: 'http://localhost:5173', // Allow requests from the frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
