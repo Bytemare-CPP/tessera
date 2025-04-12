@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.0.9",
     "@testing-library/react": "^16.2.0",
     "axios": "^1.8.1",
+    "express-rate-limit": "^7.5.0",
     "firebase": "^11.3.1",
     "joi": "^17.13.3",
     "morgan": "^1.10.0",

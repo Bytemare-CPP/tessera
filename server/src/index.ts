@@ -10,6 +10,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { authenticate } from './middleware/authMiddleware';
+import { apiLimiter } from './middleware/rateLimiter';
 
 // Import route groups
 // import authRoutes from './routes/authRoutes';
@@ -29,6 +30,9 @@ app.use(cors({
 }));
 app.use(express.json());    // Parse incoming JSON data
 app.use(morgan('dev'));     // Log incoming requests
+
+// Apply rate limiting to all API routes
+app.use('/api', apiLimiter);
 
 // Protect API routes with the authenticate middleware
 app.use('/api/users', authenticate, userRoutes);
