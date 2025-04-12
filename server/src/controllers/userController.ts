@@ -1,5 +1,5 @@
 import { Request, Response, RequestHandler } from 'express';
-import { supabase } from '../services/supabase'; // Import Supabase client
+import { supabase } from '../services/supabaseClient'; // Import Supabase client
 import Joi from 'joi';
 
 /**
