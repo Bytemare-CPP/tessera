@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
 import defaultProfilePicture from '../assets/defaultProfilePicture.png';
 import PostCard from './PostCard';
-
 interface ProfileViewProps {
   // If profileUser is provided then display that user's profile
   // If not, fall back to the logged-in user from UserContext
@@ -35,6 +35,16 @@ function ProfileView({profileUser }: ProfileViewProps) {
   const isOwnProfile = loggedInUser && displayedUser.user_id === loggedInUser?.user_id;
 
   const [activeTab, setActiveTab] = useState('posts');
+  const navigate = useNavigate();
+
+
+  const handleMessageClick = () => {
+    if (!loggedInUser || !profileUser) return;
+  
+    navigate('/direct-messages', { state: { selectedUserId: profileUser.user_id } });
+  }
+  
+  
 
   return (
     <div className="profile-layout">
@@ -47,11 +57,22 @@ function ProfileView({profileUser }: ProfileViewProps) {
         <h2 className="profile-name">{displayedUser.full_name}</h2>
         <h3 className="profile-bio">Just a regular old guy!</h3>
         <p className="profile-location">Pomona, CA | Joined 20XX</p>
-
+        {/* Only show the message button if you're viewing someone else's profile */}
+        {!isOwnProfile && (
+          <button 
+            className="edit-btn" 
+            onClick={() => handleMessageClick()}
+          >
+            Message
+          </button>
+        )}
         {/* Only show the edit button if you are on your own profile */}
         {isOwnProfile && <button className="edit-btn">Edit Profile</button>}
         <button className="share-btn">Share Profile</button>
       </div>
+
+      
+
 
       {/* Posts Section (Right Panel) */}
       <div className="profile-content">
