@@ -2,13 +2,15 @@ interface GroupCardProps {
   name: string;
   description: string;
   profilePicture: string;
+  onClick?: () => void;
 }
 
-function GroupCard({ name, description, profilePicture }: GroupCardProps) {
+function GroupCard({ name, description, profilePicture, onClick }: GroupCardProps) {
   return (
     <div
       id="groupCardDiv"
       className="bg-[#FDF7F4] h-[250px] w-[404px] flex items-center justify-evenly rounded-lg shadow-md"
+      onClick={onClick}
     >
       {/* Image Div */}
       <div

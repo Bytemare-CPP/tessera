@@ -1,13 +1,15 @@
 interface PeerCardProps {
   name: string;
   profilePicture: string;
+  onClick?: () => void;
 }
 
-function PeerCard({ name, profilePicture }: PeerCardProps) {
+function PeerCard({ name, profilePicture, onClick }: PeerCardProps) {
   return (
     <div
       id="peerCardDiv"
-      className="bg-[#FDF7F4] h-[250px] w-[200px] flex items-center justify-center rounded-lg shadow-md"
+      className="bg-[#FDF7F4] h-[250px] w-[200px] flex items-center justify-center rounded-lg shadow-md cursor-pointer"
+      onClick={onClick}
     >
       {/* Image Div */}
       <div

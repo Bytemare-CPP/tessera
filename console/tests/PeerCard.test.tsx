@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import PeerCard from '../src/components/PeerCard';
+import PeerCard from '../src/components/Cards/PeerCard';
 import { describe, it, expect } from 'vitest';
 
 describe('PeerCard component', () => {

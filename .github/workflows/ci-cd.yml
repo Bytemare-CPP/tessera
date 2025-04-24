@@ -44,7 +44,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' # Only deploy on main branch
+    if: false # github.ref == 'refs/heads/main' # Temporarily disable deployment until auth is implemented
     steps:
       - uses: actions/checkout@v4
       - name: Download build artifacts

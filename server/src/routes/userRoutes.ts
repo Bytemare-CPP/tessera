@@ -1,20 +1,12 @@
-/*
-    This file defines the endpoints related to user profiles & user data.
-*/ 
+import express from 'express';
+import { getUserProfile, updateUserProfile } from '../controllers/userController';
 
-import { Router } from 'express';
-import { getUserProfile, updateUserProfile, deleteUserProfile } from '../controllers/userController';
+const router = express.Router();
 
-// If we want to protect these routes we can: import and use checkAuth
-// import { checkAuth } from '../middlewares/checkAuth';
+// Route to get the user profile
+router.get('/profile', getUserProfile);
 
-export const userRoutes = Router();
+// Route to update the user profile
+router.put('/profile', updateUserProfile);
 
-// GET api/user/:id
-userRoutes.get('/:id', getUserProfile);
-
-// PUT api/user/:id
-userRoutes.put('/:id', updateUserProfile);
-
-// DELETE api/user/:id
-userRoutes.delete('/:id', deleteUserProfile); 
+export default router;
