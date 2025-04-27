@@ -1,2 +1,8 @@
-vibe-matcher-env/
 test_images/
+venv/
+*/venv/
+**/venv/
+**/*venv*/
+**/__pycache__/
+*.py[cod]
+.env
