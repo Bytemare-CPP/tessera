@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev:server": "npx ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:vibe-matcher": "cd src/services/vibe_matcher && python3 vibe_matcher.py",
+    "dev": "node scripts/start-dev.js",
     "build": "tsc",
     "start": "node dist/index.js"
   },
