@@ -14,6 +14,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { authenticate } from './middleware/auth';
+import { setupCleanupScheduler } from './services/cleanupScheduler';
 
 // Import route groups
 // import authRoutes from './routes/authRoutes';
@@ -21,6 +22,7 @@ import userRoutes from './routes/userRoutes';
 import connectionRoutes from './routes/connectionRoutes';
 import { postRoutes } from './routes/postsRoutes';
 import { postMediaRoutes } from './routes/postMediaRoutes';
+import selfieRoutes from './routes/selfieRoutes';
 
 const app: Application = express();
 const PORT = process.env.PORT || 4000;
@@ -44,6 +46,7 @@ app.use('/api/users', authenticate, userRoutes);
 app.use('/api/connections', authenticate, connectionRoutes);
 app.use('/api/posts', authenticate, postRoutes);
 app.use('/api/post-media', authenticate, postMediaRoutes);
+app.use('/api/selfies', selfieRoutes);
 
 // Handle undefined routes
 app.use((req, res) => {
@@ -55,6 +58,9 @@ app.use((err: Error, req: express.Request, res: express.Response) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
 });
+
+// Setup periodic cleanup of selfie candidates (runs every minute)
+setupCleanupScheduler(1);
 
 // Start the server
 app.listen(PORT, () => {
