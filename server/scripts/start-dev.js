@@ -26,11 +26,11 @@ const nodeServer = spawn('npm', ['run', 'dev:server'], {
   shell: true
 });
 
-nodeServer.stdout.on('data', (data) => {
+nodeServer.stdout && nodeServer.stdout.on('data', (data) => {
   console.log(colors.node, `[NODE] ${data.toString().trim()}`);
 });
 
-nodeServer.stderr.on('data', (data) => {
+nodeServer.stderr && nodeServer.stderr.on('data', (data) => {
   console.error(colors.node, `[NODE ERROR] ${data.toString().trim()}`);
 });
 
@@ -42,7 +42,7 @@ const isWindows = process.platform === 'win32';
 const pythonCommand = isWindows ? 'python' : 'python3';
 const venvPath = path.join(vibeMatcherPath, 'venv');
 const venvBinDir = isWindows ? 'Scripts' : 'bin';
-const venvPython = path.join(venvPath, venvBinDir, pythonCommand);
+const venvPython = path.join(venvPath, venvBinDir, isWindows ? 'python.exe' : 'python');
 
 // Check if virtual environment exists
 const hasVenv = fs.existsSync(venvPath);
@@ -54,11 +54,11 @@ const vibeMatcherProcess = spawn(pythonPath, ['vibe_matcher.py'], {
   shell: true
 });
 
-vibeMatcherProcess.stdout.on('data', (data) => {
+vibeMatcherProcess.stdout && vibeMatcherProcess.stdout.on('data', (data) => {
   console.log(colors.python, `[PYTHON] ${data.toString().trim()}`);
 });
 
-vibeMatcherProcess.stderr.on('data', (data) => {
+vibeMatcherProcess.stderr && vibeMatcherProcess.stderr.on('data', (data) => {
   console.error(colors.python, `[PYTHON ERROR] ${data.toString().trim()}`);
 });
 
@@ -74,16 +74,16 @@ process.on('SIGINT', () => {
 
 // Log if either service exits
 nodeServer.on('close', (code) => {
-  console.log(colors.system, `[SYSTEM] Node.js server exited with code ${code}`);
+  console.log(colors.system, `[SYSTEM] Node.js server exited with code ${code || 0}`);
   if (code !== 0 && !nodeServer.killed) {
-    process.exit(code);
+    process.exit(code || 1);
   }
 });
 
 vibeMatcherProcess.on('close', (code) => {
-  console.log(colors.system, `[SYSTEM] Python vibe matcher exited with code ${code}`);
+  console.log(colors.system, `[SYSTEM] Python vibe matcher exited with code ${code || 0}`);
   if (code !== 0 && !vibeMatcherProcess.killed) {
-    process.exit(code);
+    process.exit(code || 1);
   }
 });
 
