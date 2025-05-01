@@ -142,6 +142,28 @@ jobs:
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}' >> ~/tessera/server/.env"
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'VIBE_MATCHER_URL=${{ secrets.VIBE_MATCHER_URL }}' >> ~/tessera/server/.env"
           
+      - name: Set up Vibe Matcher service
+        run: |
+          # Create vibe_matcher directory
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p ~/tessera/vibe_matcher"
+          
+          # Transfer vibe_matcher files
+          rsync -avz server/src/vibe_matcher/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera/vibe_matcher/
+          
+          # Install Python dependencies
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd ~/tessera/vibe_matcher && python3 -m pip install -r requirements.txt"
+          
+          # Create environment file for Vibe Matcher
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_URL=${{ secrets.SUPABASE_URL }}' > ~/tessera/vibe_matcher/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}' >> ~/tessera/vibe_matcher/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'PORT=8000' >> ~/tessera/vibe_matcher/.env"
+          
+          # Start the Vibe Matcher with PM2
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd ~/tessera/vibe_matcher && pm2 delete vibe-matcher || echo 'No previous process to delete'; pm2 start 'python3 vibe_matcher.py' --name vibe-matcher"
+          
+          # Save PM2 configuration
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "pm2 save"
+          
       - name: Set up Nginx for API routing
         run: |
           # Create the Nginx configuration file with proper formatting
@@ -154,6 +176,18 @@ jobs:
               # API requests
               location /api/ {
                   proxy_pass http://localhost:4000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+                  proxy_set_header Host $host;
+                  proxy_cache_bypass $http_upgrade;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+
+              # Vibe Matcher API requests
+              location /vibe/ {
+                  proxy_pass http://localhost:8000/;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade $http_upgrade;
                   proxy_set_header Connection "upgrade";
