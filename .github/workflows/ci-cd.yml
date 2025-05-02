@@ -130,8 +130,8 @@ jobs:
           # Create server environment file FIRST
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_URL=${{ secrets.SUPABASE_URL }}' > ~/tessera/server/.env"
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}' >> ~/tessera/server/.env"
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'VIBE_MATCHER_URL=http://localhost/vibe' >> ~/tessera/server/.env"
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'ALLOWED_ORIGINS=http://tessera.it.com,http://www.tessera.it.com,http://54.82.27.27' >> ~/tessera/server/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'VIBE_MATCHER_URL=https://www.tessera.it.com/vibe' >> ~/tessera/server/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'ALLOWED_ORIGINS=https://www.tessera.it.com,https://tessera.it.com,http://www.tessera.it.com,http://tessera.it.com,http://54.82.27.27,*' >> ~/tessera/server/.env"
           
           # THEN install dependencies
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'cd ~/tessera/server && npm ci --production'
@@ -253,14 +253,33 @@ jobs:
           # Start the vibe matcher service with PM2
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd ~/tessera/vibe_matcher && pm2 delete vibe-matcher 2>/dev/null || echo 'No previous service'; pm2 start 'python3 vibe_matcher.py' --name vibe-matcher; pm2 save"
           
-      - name: Set up Nginx for API routing
+      - name: Set up Nginx for API routing with HTTPS
         run: |
           # Create the Nginx configuration file with proper formatting
           cat > nginx.conf << 'EOT'
+          # HTTP server - redirects to HTTPS
           server {
-              listen 80 default_server;
-              listen [::]:80 default_server;
-              server_name tessera.it.com www.tessera.it.com localhost;
+              listen 80;
+              server_name tessera.it.com www.tessera.it.com;
+              
+              # Redirect all traffic to HTTPS
+              location / {
+                  return 301 https://$host$request_uri;
+              }
+          }
+
+          # HTTPS server
+          server {
+              listen 443 ssl;
+              server_name tessera.it.com www.tessera.it.com;
+              
+              # SSL configuration
+              ssl_certificate /etc/letsencrypt/live/tessera.it.com/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/tessera.it.com/privkey.pem;
+              ssl_protocols TLSv1.2 TLSv1.3;
+              
+              # Increase upload size limit globally
+              client_max_body_size 20M;
 
               # Add CORS headers for all responses
               add_header 'Access-Control-Allow-Origin' '$http_origin' always;
@@ -278,9 +297,10 @@ jobs:
                   proxy_cache_bypass $http_upgrade;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
                   
                   # Handle file uploads
-                  client_max_body_size 10M;
+                  client_max_body_size 20M;
                   
                   # Handle OPTIONS requests for CORS
                   if ($request_method = 'OPTIONS') {
@@ -305,6 +325,10 @@ jobs:
                   proxy_cache_bypass $http_upgrade;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  
+                  # Handle file uploads for API too
+                  client_max_body_size 20M;
                   
                   # Handle OPTIONS requests for CORS
                   if ($request_method = 'OPTIONS') {
@@ -338,3 +362,7 @@ jobs:
           # Transfer and install the Nginx config
           rsync -avz nginx.conf ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/tessera.conf
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'sudo mv ~/tessera.conf /etc/nginx/conf.d/tessera.conf && sudo nginx -t && sudo systemctl restart nginx'
+          
+      - name: Check SSL Certificate Status
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'sudo certbot certificates'
