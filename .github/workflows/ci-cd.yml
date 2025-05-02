@@ -130,7 +130,7 @@ jobs:
           # Create server environment file FIRST
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_URL=${{ secrets.SUPABASE_URL }}' > ~/tessera/server/.env"
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}' >> ~/tessera/server/.env"
-          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'VIBE_MATCHER_URL=${{ secrets.VIBE_MATCHER_URL }}' >> ~/tessera/server/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'VIBE_MATCHER_URL=http://localhost/vibe' >> ~/tessera/server/.env"
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'ALLOWED_ORIGINS=http://tessera.it.com,http://www.tessera.it.com,http://54.82.27.27' >> ~/tessera/server/.env"
           
           # THEN install dependencies
@@ -141,6 +141,117 @@ jobs:
           
           # Save PM2 configuration
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'pm2 save'
+          
+      - name: Deploy Vibe Matcher with HuggingFace API
+        run: |
+          # Create vibe matcher directory
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "mkdir -p ~/tessera/vibe_matcher"
+          
+          # Create the vibe matcher service
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cat > ~/tessera/vibe_matcher/vibe_matcher.py << 'EOT'
+          from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+          from fastapi.middleware.cors import CORSMiddleware
+          import uvicorn
+          import os
+          import base64
+          import json
+          import requests
+          import random
+          from dotenv import load_dotenv
+
+          # Load environment variables
+          load_dotenv()
+          app = FastAPI()
+
+          # Add CORS middleware
+          app.add_middleware(
+              CORSMiddleware,
+              allow_origins=['*'],
+              allow_credentials=True,
+              allow_methods=['*'],
+              allow_headers=['*'],
+          )
+
+          # HuggingFace API configuration
+          HF_API_TOKEN = os.getenv('HF_API_TOKEN')
+          CLIP_MODEL_API = 'https://api-inference.huggingface.co/models/openai/clip-vit-large-patch14'
+          
+          @app.post('/match')
+          async def match_vibes(image: UploadFile = File(...), prompt: str = Form(...)):
+              try:
+                  # Read image content
+                  content = await image.read()
+                  
+                  # Convert image to base64 for HuggingFace API
+                  image_b64 = base64.b64encode(content).decode('utf-8')
+                  
+                  # Call CLIP model to calculate similarity between image and text
+                  headers = {'Authorization': f'Bearer {HF_API_TOKEN}'}
+                  payload = {
+                      'inputs': {
+                          'image': image_b64,
+                          'text': prompt
+                      }
+                  }
+                  
+                  response = requests.post(CLIP_MODEL_API, headers=headers, json=payload)
+                  
+                  # Check response
+                  if response.status_code == 200:
+                      result = response.json()
+                      return {
+                          'score': result['score'],
+                          'status': 'success',
+                          'message': f'Image-text similarity score: {result["score"]:.4f}'
+                      }
+                      
+                  # Handle model loading case
+                  elif response.status_code == 503 and 'loading' in response.text:
+                      # Use fallback scoring while model loads
+                      return {
+                          'score': 0.5 + (random.random() * 0.3),  # Random score between 0.5-0.8
+                          'status': 'loading',
+                          'message': 'Model is loading, using estimated score'
+                      }
+                      
+                  # Handle other errors
+                  else:
+                      print(f'HuggingFace API error: {response.status_code} {response.text}')
+                      return {
+                          'score': 0.5,
+                          'status': 'error',
+                          'message': f'API error: {response.status_code}'
+                      }
+                      
+              except Exception as e:
+                  print(f'Error in match_vibes: {str(e)}')
+                  # Fallback response
+                  return {
+                      'score': 0.5,
+                      'status': 'fallback',
+                      'message': 'Using fallback scoring due to error',
+                      'error': str(e)
+                  }
+          
+          @app.get('/health')
+          def health_check():
+              return {'status': 'ok', 'service': 'vibe-matcher'}
+          
+          if __name__ == '__main__':
+              port = int(os.getenv('PORT', 8000))
+              uvicorn.run(app, host='0.0.0.0', port=port)
+          EOT"
+          
+          # Install dependencies
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "sudo dnf install -y python3-pip"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "python3 -m pip install --user fastapi uvicorn python-dotenv python-multipart requests"
+          
+          # Create environment file with HuggingFace API token
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'HF_API_TOKEN=${{ secrets.HF_API_TOKEN }}' > ~/tessera/vibe_matcher/.env"
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'PORT=8000' >> ~/tessera/vibe_matcher/.env"
+          
+          # Start the vibe matcher service with PM2
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd ~/tessera/vibe_matcher && pm2 delete vibe-matcher 2>/dev/null || echo 'No previous service'; pm2 start 'python3 vibe_matcher.py' --name vibe-matcher; pm2 save"
           
       - name: Set up Nginx for API routing
         run: |
@@ -156,6 +267,33 @@ jobs:
               add_header 'Access-Control-Allow-Credentials' 'true' always;
               add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
               add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
+
+              # Vibe Matcher API
+              location /vibe/ {
+                  proxy_pass http://localhost:8000/;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+                  proxy_set_header Host $host;
+                  proxy_cache_bypass $http_upgrade;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  
+                  # Handle file uploads
+                  client_max_body_size 10M;
+                  
+                  # Handle OPTIONS requests for CORS
+                  if ($request_method = 'OPTIONS') {
+                      add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+                      add_header 'Access-Control-Allow-Credentials' 'true' always;
+                      add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                      add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
+                      add_header 'Access-Control-Max-Age' 1728000;
+                      add_header 'Content-Type' 'text/plain charset=UTF-8';
+                      add_header 'Content-Length' 0;
+                      return 204;
+                  }
+              }
 
               # API requests with CORS handling
               location /api/ {
